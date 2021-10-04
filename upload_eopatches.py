@@ -10,6 +10,8 @@ from statistics import mean
 import numpy as np
 from datetime import timezone, datetime
 import glob
+import copy
+
 def create_location(lat, lon, time, note=""):
     return [{
         'lat': lat, # Should be a string
@@ -48,6 +50,7 @@ item = response['Item']
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('plastic-debris-table')
 
+outArr = [] #structs for eo patch
 EOPATCH_FOLDER = os.path.join('.', 'eopatches')
 directory_contents = os.listdir(EOPATCH_FOLDER)
 for item in directory_contents:
@@ -69,18 +72,20 @@ for item in directory_contents:
 	timestamp = int(patch.timestamp[0].replace(tzinfo=timezone.utc).timestamp())
 	
 	# prepare data for upload
-	date = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d')
 	debris_data = create_location(str(center_lat), str(center_lon), timestamp, note="patch contains "+str(perc_debris)+" percent debris")
-	
-	# upload data
-	table.put_item(
-    Item={
-        'date': date,
-        'plastic_cluster_data': debris_data
-    }
-	# delete the EOPatch from local filesystem
-	#shutil.rmtree(EOPATCH_FOLDER+"//"+item)
-	)
+	outArr += copy.deepcopy(debris_data)
+
+# upload data
+date = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d')
+
+table.put_item(
+Item={
+    'date': date,
+    'plastic_cluster_data': outArr
+}
+# delete the EOPatch from local filesystem
+#shutil.rmtree(EOPATCH_FOLDER+"//"+item)
+)
 	
 #clean up the scenes directory
 #os.remove(glob.glob('.//scenes//*.json')[0])
