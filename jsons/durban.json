@@ -1,0 +1,8 @@
+{
+    "minLon" : -29.908949,
+    "maxLon" : -29.850490,
+    "minLat" : 30.991053,
+    "maxLat" : 31.079215,
+    "timeRange": ["2019-04-20", "2019-04-23"],
+    "outputDir" : "/mnt/e/NASASpaceApps/PMLDataPipeline-master/eopatches"
+}
